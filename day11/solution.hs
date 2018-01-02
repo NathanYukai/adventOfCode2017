@@ -6,10 +6,15 @@ main = do
     fileStr <- readFile $ head args
     let 
         steps = splitOn "," $ init fileStr 
-        result = foldr (\s l->moveStep l s) (0,0) $ reverse steps
-    putStrLn $ show steps
+        result = getDistance steps
+        allDist = fmap getDistance (allSubSteps steps)
     putStrLn $ show result
-    putStrLn $ show $ cubicDistance (axialToCube result) (0,0,0)
+    putStrLn $ show allDist
+    putStrLn $ show $ maximum allDist
+
+getDistance :: [String] -> Int
+getDistance steps = cubicDistance (axialToCube result) (0,0,0)
+    where result = foldr (\s l->moveStep l s) (0,0) $ reverse steps
 
 -- Axial corordinate
 type Loc = (Int,Int)
@@ -32,4 +37,6 @@ cubicDistance :: Cubic -> Cubic -> Int
 cubicDistance (a,b,c) (x,y,z) = maximum[abs(a-x), abs(b-y), abs(c-z)]
 
 
-
+allSubSteps :: [a] -> [[a]]
+allSubSteps l = fmap (\s -> fst $ splitAt s l) len
+    where len = [1..(length l)]

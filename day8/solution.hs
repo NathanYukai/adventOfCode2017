@@ -9,8 +9,13 @@ main = do
     let 
         commandsStr = lines fileStr
         cmdObjs = map rawInputToCMD commandsStr
-        resMap = foldr calculate Map.empty $ reverse cmdObjs
+        resMap = foldr processing (Map.empty,0) $ reverse cmdObjs
     putStrLn $ show resMap
+
+
+processing :: CMD -> (Map.Map String Int, Int) -> (Map.Map String Int, Int)
+processing cmd (m, h) = (newM, max h (highestInMap newM) )
+    where newM = calculate cmd m
 
 data CMD = CMD { reg :: String,
                  op :: String,
@@ -22,6 +27,12 @@ data CMD = CMD { reg :: String,
 rawInputToCMD :: String -> CMD 
 rawInputToCMD str = createCMD $ (words str) \\ ["if"]
     where createCMD = \ [r, o, v, cr, ct, cv] -> CMD r o (read v :: Int) cr ct (read cv :: Int)
+
+
+highestInMap :: Map.Map String Int -> Int
+highestInMap ma
+  | length ( Map.toList ma ) > 0 = maximum $ map snd ( Map.toList ma)
+  | otherwise = 0
 
 
 calculate :: CMD -> Map.Map String Int-> Map.Map String Int
